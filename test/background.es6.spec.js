@@ -2,8 +2,13 @@ import Background from '../src/background.es6.js';
 
 
 describe('Background Class', ()=>{
+    jasmine.clock().install();
+
     let background = null,
         myEl       = null,
+        changeSpy  = null,
+        clearSpy   = null,
+        setSpy     = null,
         dayAsset   = "../day.png",
         nightAsset = "../night.png";
 
@@ -26,25 +31,15 @@ describe('Background Class', ()=>{
             "<div id='background'></div>"
         );
 
-        myEl = document.getElementById(background.backgroundElementId);
+        myEl      = document.getElementById(background.backgroundElementId);
+        changeSpy = jasmine.createSpy("background.changeBackground");
+        clearSpy  = jasmine.createSpy("window.clearInterval");
+        setSpy    = jasmine.createSpy("window.setInterval");
     });
     afterEach(()=>{
         if (document.getElementById(background.backgroundElementId)) {
             document.body.removeChild(document.getElementById(background.backgroundElementId));
         }
-    });
-
-
-    describe('buildBackgroundId', ()=>{
-        it('returns the default background id', ()=>{
-            expect(background.buildBackgroundId()).toBe("#background");
-        });
-        it('returns the same string if it starts with a hash', ()=>{
-            expect(background.buildBackgroundId("#test")).toBe("#test");
-        });
-        it('prefixes the given string with a hash', ()=>{
-            expect(background.buildBackgroundId("test")).toBe("#test");
-        });
     });
 
     describe('getTimeInHours', ()=>{
@@ -84,19 +79,31 @@ describe('Background Class', ()=>{
             expect(myEl.parentElement).toBe(document.body);
         });
         it('should update the background element CSS', ()=>{
-
-            let oldBackgroundCss = myEl.style.background;
+            myEl.style.background = "changeMe.png";
 
             background.changeBackground("changed.png");
 
-            console.log(document.getElementById(background.backgroundElementId).style.background);
-
-            expect(document.getElementById(background.backgroundElementId).style.background).not.toBe("url(${oldBackgroundCss})");
+            expect(document.getElementById(background.backgroundElementId).style.background).not.toBe("url(changeMe.png)");
         });
     });
 
+    describe('start', ()=>{
+        it('should call changeBackground', ()=>{
+            background.start();
 
+            setTimeout(()=>{
+                expect(changeSpy).toHaveBeenCalled();
+            }, 200);
+        });
+        it('should update background.previousAsset', ()=>{
+            background.previousAsset = "fakeOldAsset";
+            background.start();
 
-
+            setTimeout(()=>{
+                expect(background.previousAsset).not.toBe("fakeOldAsset");
+                background.stop();
+            }, 200);
+        });
+    });
 
 });

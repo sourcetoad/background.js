@@ -8,27 +8,13 @@ class Background {
         if (!args) { throw new Error("An options object is required"); }
         if (!args.dayAsset || !args.nightAsset) { throw new Error("The options object must include a 'dayAsset' and 'nightAsset'."); }
 
-        this.dayAsset            = args.dayAsset;
-        this.nightAsset          = args.nightAsset;
-        this.backgroundElementId = this.buildBackgroundId(this.backgroundElementId);
-        this.previousAsset       = null;
-        this.backgroundCss       = ""
-    }
-
-
-    /**
-     * @param {string} id - id of the element whos background will be changed.
-     */
-    buildBackgroundId(id) {
-        if (!id) { 
-            return "#background"; 
-        }
-
-        if (id.charAt(0) == "#") {
-            return id;
-        } else {
-            return ("#" + id);
-        }
+            this.dayAsset            = args.dayAsset;
+            this.nightAsset          = args.nightAsset;
+            this.backgroundElementId = this.backgroundElementId || "background";
+            this.elementSelector     = "#" + this.backgroundElementId;
+            this.previousAsset       = null;
+            this.backgroundCss       = "";
+            this.changeInterval      = null;
     }
 
 
@@ -36,7 +22,7 @@ class Background {
      * 
      */
     start() {
-        setInterval(()=>{
+        this.changeBackgroundInterval = window.setInterval(()=>{
             var asset = this.chooseAsset(this.getTimeInHours());
 
             if (asset != this.previousAsset) {
@@ -48,13 +34,21 @@ class Background {
 
 
     /**
+     * 
+     */
+    stop() {
+        return window.clearInterval(this.changeBackgroundInterval);
+    }
+
+
+    /**
      * @return - element object of the element whos background was updated
      */
     changeBackground(asset) {
         if (!asset) { throw new Error("An asset is required."); }
         var element = document.getElementById(this.backgroundElementId);
 
-        element.style.background = "url(${asset})";
+        element.style.background = "url(" + asset + ")";
 
         return element;
     }
@@ -89,7 +83,6 @@ class Background {
             break;
         }
     }
-
 
 
 };
