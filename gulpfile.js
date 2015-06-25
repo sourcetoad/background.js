@@ -1,5 +1,6 @@
 var gulp  = require("gulp"),
     babel = require("gulp-babel"),
+    rename = require("gulp-rename"),
     karma = require('karma').server;
 
 
@@ -9,7 +10,11 @@ var gulp  = require("gulp"),
  */
 gulp.task("babel", function () {
     return gulp.src("src/background.es6.js")
-        .pipe(babel()) 
+        .pipe(babel())
+        .pipe(rename(function(path){
+            path.basename = path.basename.replace(".es6", "");
+            path.extname = ".es5.js"
+        }))
         .pipe(gulp.dest("dist"));
 });
 
